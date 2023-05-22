@@ -1,15 +1,22 @@
 const tpr = require('../../../data/tpr');
 const config = require('../../../.config');
-const Twit = require('twit');
+const { TwitterApi } = require('twitter-api-v2');
 const tweet = require('../../../src/tweet');
 
-const T = new Twit({
-  consumer_key: config.tpr.consumer_key,
-  consumer_secret: config.tpr.consumer_secret,
-  access_token: config.tpr.access_token,
-  access_token_secret: config.tpr.access_token_secret,
+const twitterClient = new TwitterApi({
+  appKey: config.tpr.appKey,
+  appSecret: config.tpr.appSecret,
+  accessToken: config.tpr.accessToken,
+  accessSecret: config.tpr.accessSecret,
 });
 
-module.exports = (req, res) => {
-  tweet(tpr, T, res);
+const readWriteClient = twitterClient.readWrite;
+
+module.exports = async (req, res) => {
+  try {
+    await tweet(tpr, readWriteClient);
+    res.status(200).send(`Post ok`);
+  } catch (error) {
+    res.status(500).send(`Error: ${error.message}\n`, error);
+  }
 };
